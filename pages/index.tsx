@@ -4,12 +4,29 @@ import Layout from '../components/ui/layout/layout/Layout'
 import { MainBannerHomeSection } from '../components/ui/sections/home/MainBannerHomeSection'
 import { CityPreview } from '../components/ui/sections/home/CityPreview'
 
+import { GetStaticProps } from 'next';
+import Page from '../components/ui/blueprints/Page';
+import ProductCard from '../components/ui/blueprints/ProductCard';
+import { getProducts, Product } from '../lib/products';
 
+interface HomePageProps {
+  products: Product[];
+}
 
-export default function Home() {
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  console.log('[HomePage] getStaticProps()');
+  const products = await getProducts();
+  return {
+    props: { products },
+    revalidate: parseInt(process.env.REVALIDATE_SECONDS),
+  };
+};
+const HomePage: React.FC<HomePageProps> = ({ products }) => {
+  console.log('[HomePage] render:', products);
   return (
-    <>
-    <NextSeo
+        <Layout title="Frankgualada">
+    <Page title="Indoor Plants">
+         <NextSeo
       twitter={{
         handle: '@handle',
         site: '@site',
@@ -34,10 +51,18 @@ export default function Home() {
         ],
       }}
     />
-    <Layout title="Frankgualada">
       <MainBannerHomeSection />
+        <ul className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {products.map((product) => (
+          <li key={product.id}>
+            <ProductCard product={product} />
+          </li>
+        ))}
+      </ul>
+    </Page>
     </Layout>
+  );
+};
 
-  </>
-  )
-}
+export default HomePage;
+  
